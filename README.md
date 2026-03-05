@@ -242,6 +242,82 @@ Skills are `SKILL.md` files that teach AI agents how to use this CLI:
 
 ---
 
+## OpenClaw Agent Setup
+
+To give an [OpenClaw](https://openclaw.ai) agent access to Microsoft 365, install `ms365-cli` on the agent's droplet and authenticate once. The agent can then call all commands via its `exec` tool.
+
+### 1 — Install on the agent's server
+
+```bash
+npm install -g ms365-cli
+```
+
+### 2 — Authenticate as the agent's email account
+
+```bash
+# Run as the tofu service user
+su - tofu -c 'm365 login --client-id <client-id> --tenant-id <tenant-id>'
+```
+
+Follow the device code prompt — open the URL in a browser, sign in as the agent's email account. Tokens are cached at `~/.m365/token-cache.json` for the `tofu` user.
+
+### 3 — Install skills into OpenClaw
+
+```bash
+# Symlink all ms365 skills (stays in sync with repo updates)
+ln -s /path/to/ms365-cli/skills/m365-* ~/.openclaw/skills/
+
+# Or copy specific skills
+cp -r /path/to/ms365-cli/skills/m365-mail ~/.openclaw/skills/
+cp -r /path/to/ms365-cli/skills/m365-calendar ~/.openclaw/skills/
+```
+
+### 4 — Add email instructions to the agent's SOUL.md
+
+Add a section like this to the agent's `SOUL.md` so it knows how to use email:
+
+```markdown
+## Email Access
+
+You have full access to your Outlook inbox via the `m365` CLI. Use the `exec` tool.
+
+### Check inbox
+m365 mail unread-count
+m365 mail list --filter "isRead eq false" --top 20 --pretty
+
+### Send email
+m365 mail send --to recipient@example.com --subject "Subject" --body "Body"
+
+### Reply
+m365 mail reply <message-id> --body "Your reply here"
+
+### Search
+m365 mail search "from:someone@company.com"
+```
+
+### 5 — Test from the agent's Slack channel
+
+Ask the agent:
+> "Check my email and tell me what's unread"
+
+The agent will call `m365 mail list --filter "isRead eq false"` via exec and report back.
+
+---
+
+### Re-authentication
+
+Tokens are long-lived but will eventually expire. If the agent reports auth errors:
+
+```bash
+# Re-run login from the server
+ssh root@<droplet-ip> "su - tofu -c 'm365 login --client-id <id> --tenant-id <id>'"
+# Follow device code flow again
+```
+
+> **Tip for MFA accounts:** Add the agent's email to your Microsoft Authenticator app so you can approve re-auth prompts without needing the client's help.
+
+---
+
 ## Development
 
 ```bash
