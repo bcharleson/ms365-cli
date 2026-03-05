@@ -1,4 +1,4 @@
-# microsoft365-cli
+# ms365-cli
 
 **Microsoft 365 in your terminal.** Read and send email, manage calendar events, browse OneDrive, and search contacts — from a single command line.
 
@@ -24,41 +24,63 @@ npm install -g ms365-cli
 
 ---
 
-## Install
+## Setup (5 minutes)
+
+### Step 1 — Install
 
 ```bash
 npm install -g ms365-cli
 ```
 
-## Authentication
+### Step 2 — Register an Azure AD App
 
-### 1. Register an Azure AD App (one time)
+You need a free Azure AD app to authenticate. This is a one-time setup.
 
-1. Go to [portal.azure.com → App registrations](https://portal.azure.com/#view/Microsoft_AAD_RegisteredApps)
+1. Go to **[portal.azure.com → App registrations](https://portal.azure.com/#view/Microsoft_AAD_RegisteredApps)**
 2. Click **New registration**
-   - Name: `m365-cli` (or anything)
-   - Supported account types: **Accounts in any organizational directory and personal Microsoft accounts**
-   - Redirect URI: `Mobile and desktop applications` → `http://localhost`
-3. Copy the **Application (client) ID**
-4. Go to **API permissions → Add a permission → Microsoft Graph → Delegated**
-   - Add: `Mail.ReadWrite`, `Mail.Send`, `Calendars.ReadWrite`, `Files.ReadWrite`, `Contacts.ReadWrite`, `User.Read`
-5. Click **Grant admin consent** (if you have admin rights) or have users consent individually
+   - **Name:** anything (e.g. `ms365-cli`)
+   - **Supported account types:** Accounts in any organizational directory and personal Microsoft accounts
+   - **Redirect URI:** Select `Mobile and desktop applications` → enter `http://localhost`
+3. Click **Register** — copy the **Application (client) ID** and **Directory (tenant) ID**
+4. Go to **API permissions → Add a permission → Microsoft Graph → Delegated permissions**
+   - Search and add each: `Mail.ReadWrite`, `Mail.Send`, `Calendars.ReadWrite`, `Files.ReadWrite`, `Contacts.ReadWrite`, `User.Read`
+   - Click **Add permissions**
+5. Click **Grant admin consent for [your org]** — all permissions should show a green checkmark
+6. Go to **Authentication → Advanced settings** → set **Allow public client flows** to **Yes** → **Save**
 
-### 2. Login
-
-```bash
-# Set your client ID (or export M365_CLIENT_ID=your-id)
-m365 auth login --client-id 00000000-0000-0000-0000-000000000000
-
-# Follow the device code prompt — open the URL in a browser, sign in
-# Tokens cached at ~/.m365/token-cache.json
-```
-
-### 3. Check status
+### Step 3 — Login
 
 ```bash
-m365 auth status --pretty
+m365 login --client-id <your-application-client-id> --tenant-id <your-directory-tenant-id>
 ```
+
+This prints a URL and a code:
+
+```
+To sign in, use a web browser to open https://microsoft.com/devicelogin
+and enter the code XXXXXXXX to authenticate.
+```
+
+Open the URL in a browser, enter the code, sign in with your Microsoft account. Done — tokens are cached at `~/.m365/token-cache.json` and silently refreshed from then on.
+
+> **Tip:** Set env vars to avoid passing flags every time:
+> ```bash
+> export M365_CLIENT_ID="your-client-id"
+> export M365_TENANT_ID="your-tenant-id"
+> m365 login
+> ```
+
+### Step 4 — Verify
+
+```bash
+m365 status --pretty
+# → {"authenticated":true,"account":"you@example.com",...}
+
+m365 mail unread-count
+# → {"folder":"Inbox","unread":4,"total":12}
+```
+
+You're in. All commands are now available.
 
 ---
 
