@@ -11,7 +11,7 @@ import {
 const BASE_URL = 'https://graph.microsoft.com/v1.0';
 const MAX_RETRIES = 3;
 const REQUEST_TIMEOUT = 30_000;
-const VERSION = '0.1.0';
+const VERSION = '0.2.0';
 
 interface ClientOptions {
   getToken: () => Promise<string>;

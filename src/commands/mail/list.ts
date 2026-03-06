@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import type { CommandDefinition } from '../../core/types.js';
-import { executeCommand } from '../../core/handler.js';
+import { executeCommand, stripODataMetadata } from '../../core/handler.js';
 
 export const mailListCommand: CommandDefinition = {
   name: 'mail_list',
@@ -24,6 +24,8 @@ export const mailListCommand: CommandDefinition = {
       .describe('Folder name or ID (inbox, sentitems, drafts, deleteditems, junkemail)'),
     filter: z.string().optional()
       .describe('OData $filter expression, e.g. "isRead eq false"'),
+    unread: z.boolean().optional()
+      .describe('Shorthand for --filter "isRead eq false"'),
     select: z.string().optional()
       .describe('Comma-separated fields to return, e.g. "id,subject,from"'),
     orderby: z.string().optional()
@@ -35,6 +37,7 @@ export const mailListCommand: CommandDefinition = {
       { field: 'top', flags: '-n, --top <number>', description: 'Number of messages (1-1000)' },
       { field: 'skip', flags: '--skip <number>', description: 'Skip N messages' },
       { field: 'folder', flags: '-f, --folder <name>', description: 'Folder: inbox, sentitems, drafts, deleteditems, junkemail' },
+      { field: 'unread', flags: '--unread', description: 'Show only unread messages (shorthand for --filter "isRead eq false")' },
       { field: 'filter', flags: '--filter <odata>', description: 'OData filter, e.g. "isRead eq false"' },
       { field: 'select', flags: '--select <fields>', description: 'Fields to return, e.g. "id,subject,from"' },
       { field: 'orderby', flags: '--orderby <expr>', description: 'Sort order, e.g. "receivedDateTime desc"' },
@@ -52,5 +55,14 @@ export const mailListCommand: CommandDefinition = {
     orderby: 'odata',
   },
 
-  handler: (input, client) => executeCommand(mailListCommand, input, client),
+  handler: async (input, client) => {
+    const resolvedInput: Record<string, unknown> = { ...input };
+    if (input.unread) {
+      const unreadFilter = 'isRead eq false';
+      resolvedInput.filter = input.filter ? `${input.filter} AND ${unreadFilter}` : unreadFilter;
+    }
+    delete resolvedInput.unread;
+    const result = await executeCommand(mailListCommand, resolvedInput as typeof input, client);
+    return stripODataMetadata(result);
+  },
 };

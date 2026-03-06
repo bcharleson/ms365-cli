@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import type { CommandDefinition } from '../../core/types.js';
-import { executeCommand } from '../../core/handler.js';
+import { executeCommand, stripODataMetadata } from '../../core/handler.js';
 
 export const calendarListCommand: CommandDefinition = {
   name: 'calendar_list',
@@ -45,7 +45,7 @@ export const calendarListCommand: CommandDefinition = {
     orderby: 'odata',
   },
 
-  handler: (input, client) => {
+  handler: async (input, client) => {
     const now = new Date();
     const weekLater = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
     const resolved = {
@@ -53,6 +53,7 @@ export const calendarListCommand: CommandDefinition = {
       start: input.start ?? now.toISOString(),
       end: input.end ?? weekLater.toISOString(),
     };
-    return executeCommand(calendarListCommand, resolved, client);
+    const result = await executeCommand(calendarListCommand, resolved, client);
+    return stripODataMetadata(result);
   },
 };

@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import type { CommandDefinition } from '../../core/types.js';
-import { executeCommand } from '../../core/handler.js';
+import { executeCommand, stripODataMetadata } from '../../core/handler.js';
 
 export const contactsListCommand: CommandDefinition = {
   name: 'contacts_list',
@@ -37,5 +37,8 @@ export const contactsListCommand: CommandDefinition = {
     orderby: 'odata',
   },
 
-  handler: (input, client) => executeCommand(contactsListCommand, input, client),
+  handler: async (input, client) => {
+    const result = await executeCommand(contactsListCommand, input, client);
+    return stripODataMetadata(result);
+  },
 };

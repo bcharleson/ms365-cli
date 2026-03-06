@@ -6,3 +6,5 @@ export { mailDeleteCommand } from './delete.js';
 export { mailSearchCommand } from './search.js';
 export { mailUnreadCountCommand } from './unread-count.js';
 export { mailMoveCommand } from './move.js';
+export { mailAttachmentsListCommand } from './attachments-list.js';
+export { mailAttachmentsGetCommand } from './attachments-get.js';

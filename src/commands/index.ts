@@ -22,6 +22,8 @@ import {
   mailSearchCommand,
   mailUnreadCountCommand,
   mailMoveCommand,
+  mailAttachmentsListCommand,
+  mailAttachmentsGetCommand,
 } from './mail/index.js';
 
 // Calendar
@@ -39,6 +41,7 @@ import {
   driveGetCommand,
   driveSearchCommand,
   driveDeleteCommand,
+  driveDownloadCommand,
 } from './drive/index.js';
 
 // Contacts
@@ -59,6 +62,8 @@ export const allCommands: CommandDefinition[] = [
   mailSearchCommand,
   mailUnreadCountCommand,
   mailMoveCommand,
+  mailAttachmentsListCommand,
+  mailAttachmentsGetCommand,
   // Calendar
   calendarListCommand,
   calendarGetCommand,
@@ -70,6 +75,7 @@ export const allCommands: CommandDefinition[] = [
   driveGetCommand,
   driveSearchCommand,
   driveDeleteCommand,
+  driveDownloadCommand,
   // Contacts
   contactsListCommand,
   contactsGetCommand,

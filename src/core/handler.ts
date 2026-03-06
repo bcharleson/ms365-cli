@@ -1,5 +1,22 @@
 import type { CommandDefinition, GraphClient } from './types.js';
 
+/**
+ * Removes OData metadata properties (e.g. @odata.context, @odata.count) from a
+ * Graph API response object. Keeps @odata.nextLink intact so callers can still
+ * detect pagination if needed, but strips presentational noise from CLI output.
+ */
+export function stripODataMetadata(obj: unknown): unknown {
+  if (typeof obj !== 'object' || obj === null) return obj;
+  const KEEP_KEYS = new Set(['@odata.nextLink']);
+  const result: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(obj as Record<string, unknown>)) {
+    if (!key.startsWith('@odata.') || KEEP_KEYS.has(key)) {
+      result[key] = value;
+    }
+  }
+  return result;
+}
+
 const ODATA_PREFIX: Record<string, string> = {
   filter: '$filter',
   select: '$select',

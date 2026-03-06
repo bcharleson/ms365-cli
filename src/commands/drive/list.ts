@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import type { CommandDefinition } from '../../core/types.js';
-import { executeCommand } from '../../core/handler.js';
+import { executeCommand, stripODataMetadata } from '../../core/handler.js';
 
 export const driveListCommand: CommandDefinition = {
   name: 'drive_list',
@@ -40,10 +40,11 @@ export const driveListCommand: CommandDefinition = {
     orderby: 'odata',
   },
 
-  handler: (input, client) => {
+  handler: async (input, client) => {
     const path = input.folderId
       ? `/me/drive/items/${encodeURIComponent(String(input.folderId))}/children`
       : '/me/drive/root/children';
-    return executeCommand({ ...driveListCommand, endpoint: { method: 'GET', path } }, input, client);
+    const result = await executeCommand({ ...driveListCommand, endpoint: { method: 'GET', path } }, input, client);
+    return stripODataMetadata(result);
   },
 };
